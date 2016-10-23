@@ -746,7 +746,7 @@ function AMTparseExpr(str,rightbracket) {
 		if (right==')' || right==']') {
 			var left = newFrag.charAt(6);
 			if ((left=='(' && right==')' && symbol.output != '}') || (left=='[' && right==']')) {
-				var mxout = '\\matrix{';
+				var mxout = '\\begin{matrix}';
 				var pos = new Array(); //position of commas
 				pos.push(0);
 				var matrix = true;
@@ -815,7 +815,7 @@ function AMTparseExpr(str,rightbracket) {
 						mxout += subarr.join('&');
 					}
 				}
-				mxout += '}';
+				mxout += '\\end{matrix}';
 
 				if (matrix) { newFrag = mxout;}
 			}
