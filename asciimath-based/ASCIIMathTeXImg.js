@@ -1021,46 +1021,11 @@ var AMnoMathML = true;
 
 AMinitSymbols();
 
-window.translate = translate;
-window.AMTconfig = config;
-window.AMprocessNode = AMprocessNode;
-window.AMparseMath = AMparseMath;
-window.AMTparseMath = AMparseMath;
-window.AMTparseAMtoTeX = AMTparseAMtoTeX;
+module.exports.translate = translate;
+module.exports.AMTconfig = config;
+module.exports.AMprocessNode = AMprocessNode;
+module.exports.AMparseMath = AMparseMath;
+module.exports.AMTparseMath = AMparseMath;
+module.exports.AMTparseAMtoTeX = AMTparseAMtoTeX;
 
-function generic(){
-  if (config.translateOnLoad) {
-      translate();
-  }
-}
-
-//setup onload function
-if(typeof window.addEventListener != 'undefined'){
-  //.. gecko, safari, konqueror and standard
-  window.addEventListener('load', generic, false);
-}
-else if(typeof document.addEventListener != 'undefined'){
-  //.. opera 7
-  document.addEventListener('load', generic, false);
-}
-else if(typeof window.attachEvent != 'undefined'){
-  //.. win/ie
-  window.attachEvent('onload', generic);
-}else{
-  //.. mac/ie5 and anything else that gets this far
-  //if there's an existing onload function
-  if(typeof window.onload == 'function'){
-    //store it
-    var existing = onload;
-    //add new onload handler
-    window.onload = function(){
-      //call existing onload function
-      existing();
-      //call generic onload function
-      generic();
-    };
-  }else{
-    window.onload = generic;
-  }
-}
 })();
