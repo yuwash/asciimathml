@@ -14,3 +14,21 @@ providing the conversion scripts (originally for web browsers):
 * asciimath-based/ASCIIMathTeXImg.js provides utility functions
   AMTparseAMtoTeX, AMparseMath, and AMprocessNode to convert
   expressions in AsciiMath notation into LaTeX expressions.
+
+## Dependencies
+
+You need node.js and the [pandoc-filter](https://github.com/mvhenderson/pandoc-filter-node) package:
+
+```
+npm install -g pandoc-filter
+```
+
+## Usage
+
+[Run pandoc with](http://pandoc.org/scripting.html#json-filters) this filter:
+
+```
+pandoc --filter ./path/to/asciimathfilter.js [your options ...]
+```
+
+The filter will apply conversion on any inline or block math object beginning with `:a`, e. g. `$:a sum_(k=1)^3 k$`.
