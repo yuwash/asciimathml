@@ -422,7 +422,6 @@ function AMgetSymbol(str) {
   }
   AMpreviousSymbol=AMcurrentSymbol;
   if (match!=""){
-  	  console.log(AMsymbols[mk]);
     AMcurrentSymbol=AMsymbols[mk].ttype;
     return AMsymbols[mk];
   }
@@ -882,7 +881,6 @@ function AMparseMath(str) {
 	  return document.createTextNode(" ");
   }
   var texstring = AMTparseAMtoTeX(str);
-  console.log(texstring);
   if (typeof mathbg != "undefined" && mathbg=='dark') {
 	  texstring = "\\reverse " + texstring;
   }
