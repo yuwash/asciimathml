@@ -1,0 +1,12 @@
+{
+  "name": "asciimathml-pandocfilter",
+  "version": "1.0.0",
+  "description": "Node.js-based Pandoc filters for converting asciimathml into TeX",
+  "main": "asciimathfilter.js",
+  "repository": "https://github.com/yuwash/asciimathml-pandocfilter.git",
+  "author": "Yushin Washio <yuwash@yandex.com>",
+  "license": "MIT",
+  "dependencies": {
+    "pandoc-filter": "^0.1.8"
+  }
+}
