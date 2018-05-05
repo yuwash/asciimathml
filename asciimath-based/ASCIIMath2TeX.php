@@ -116,10 +116,10 @@ array( 'input'=>'uuu', 'tex'=>'bigcup', 'underover'=>TRUE),
 // Binary relation symbols
 array( 'input'=>'!=', 'tex'=>'ne'),
 array( 'input'=>':=' ), 			
-array( 'input'=>'<', 'tex'=>'lt'),
+array( 'input'=>'lt', 'tex'=>'<', 'val'=>TRUE),
 array( 'input'=>'<=', 'tex'=>'le'),
 array( 'input'=>'lt=', 'tex'=>'leq'),
-array( 'input'=>'>', 'tex'=>'gt'), 
+array( 'input'=>'gt', 'tex'=>'>', 'val'=>TRUE), 
 array( 'input'=>'>=', 'tex'=>'ge'),
 array( 'input'=>'gt=', 'tex'=>'geq'),
 array( 'input'=>'-<', 'tex'=>'prec'),
@@ -281,6 +281,8 @@ array( 'input'=>'vec', 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'tilde', 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'dot', 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'ddot', 'unary'=>TRUE, 'acc'=>TRUE),
+array( 'input'=>'overarc', 'tex'=>'stackrel{\\frown}', 'notexcopy'=>true, 'unary'=>TRUE, 'acc'=>TRUE),
+array( 'input'=>'overparen', 'tex'=>'stackrel{\\frown}', 'notexcopy'=>true, 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'ul', 'tex'=>'underline', 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'ubrace', 'tex'=>'underbrace', 'unary'=>TRUE, 'acc'=>TRUE),
 array( 'input'=>'obrace', 'tex'=>'overbrace', 'unary'=>TRUE, 'acc'=>TRUE),
@@ -296,9 +298,16 @@ array( 'input'=>'(', 'leftbracket'=>TRUE, 'val'=>TRUE),
 array( 'input'=>')', 'rightbracket'=>TRUE, 'val'=>TRUE),
 array( 'input'=>'[', 'leftbracket'=>TRUE, 'val'=>TRUE),
 array( 'input'=>']', 'rightbracket'=>TRUE, 'val'=>TRUE),
+array( 'input'=>'left(', 'tex'=>'(', 'notexcopy'=>true, 'leftbracket'=>TRUE, 'val'=>TRUE),
+array( 'input'=>'right)', 'tex'=>')', 'notexcopy'=>true, 'rightbracket'=>TRUE, 'val'=>TRUE),
+array( 'input'=>'left[', 'tex'=>'[', 'notexcopy'=>true, 'leftbracket'=>TRUE, 'val'=>TRUE),
+array( 'input'=>'right]', 'tex'=>']', 'notexcopy'=>true, 'rightbracket'=>TRUE, 'val'=>TRUE),
 array( 'input'=>'{', 'tex'=>'lbrace', 'leftbracket'=>TRUE),
 array( 'input'=>'}', 'tex'=>'rbrace', 'rightbracket'=>TRUE),
 array( 'input'=>'|', 'leftright'=>TRUE, 'val'=>TRUE),
+array( 'input'=>'|:', 'tex'=>'|', 'leftbracket'=>TRUE, 'notexcopy'=>TRUE, 'val'=>TRUE),
+array( 'input'=>':|', 'tex'=>'|', 'rightbracket'=>TRUE, 'notexcopy'=>TRUE, 'val'=>TRUE),
+array( 'input'=>':|:', 'tex'=>'|', 'const'=>TRUE, 'notexcopy'=>TRUE, 'val'=>TRUE),
 array( 'input'=>'(:', 'tex'=>'langle', 'leftbracket'=>TRUE),
 array( 'input'=>':)', 'tex'=>'rangle', 'rightbracket'=>TRUE),
 array( 'input'=>'{:', 'leftbracket'=>TRUE, 'invisible'=>TRUE),
@@ -729,7 +738,7 @@ function AMTparseExpr($str,$rightbracket) {
 			if ($right==')' || $right==']') {
 				$left = $newFrag{6};
 				if (($left=='(' && $right==')' && $symbol['input']!='}') || ($left=='[' && $right==']')) {
-					$mxout = '\\matrix{';
+					$mxout = '';
 					$pos = array();
 					array_push($pos,0);
 					$matrix = true;
@@ -738,12 +747,14 @@ function AMTparseExpr($str,$rightbracket) {
 					$subpos[0] = array(0);
 					$lastsubposstart = 0;
 					$mxanynestingd = 0;
+					$columnaligns = '';
 					$addedlast = true;
+					$newFragLen = strlen($newFrag);
 					for ($i=1; $i<$len-1;$i++) {
 						if ($newFrag{$i}==$left) { $mxnestingd++;}
 						if ($newFrag{$i}==$right) {
 							$mxnestingd--;
-							if ($mxnestingd==0 && $newFrag{$i+2}==',' && $newFrag{$i+3}=='{') {
+							if ($mxnestingd==0 && $newFragLen>$i+3 && $newFrag{$i+2}==',' && $newFrag{$i+3}=='{') {
 								array_push($pos,$i+2);
 								$lastsubposstart= $i+2;
 								$subpos[$lastsubposstart] = array($i+2);
@@ -792,6 +803,16 @@ function AMTparseExpr($str,$rightbracket) {
 							if (count($subpos[$pos[$i]])>1) {
 								$subarr[] = substr($newFrag,$subpos[$pos[$i]][$j-1]+1,$pos[$i+1] -8 - $subpos[$pos[$i]][$j-1]-1);
 							}
+							for ($j=count($subarr)-1;$j>=0;$j--) {
+								if ($subarr[$j]=='{\\mid}') {
+									if ($i==0) {
+										$columnaligns = '|'.$columnaligns;
+									} 
+									array_splice($subarr, $j, 1);
+								} else if ($i==0) {
+									$columnaligns = 'c'.$columnaligns;
+								}
+							}
 							if ($lastmxsubcnt>0 && count($subarr)!=$lastmxsubcnt) {
 								$matrix = false;
 							} else if ($lastmxsubcnt==-1) {
@@ -800,7 +821,7 @@ function AMTparseExpr($str,$rightbracket) {
 							$mxout .= implode('&',$subarr);
 						}
 					}
-					$mxout .= '}';
+					$mxout = "\\begin{array}{".$columnaligns."} ".$mxout."\\end{array}";
 					if ($matrix) {
 						$newFrag = $mxout;
 					}
@@ -833,7 +854,7 @@ function AMTparseAMtoTeX($str) {
 	return ($result[0]);
 }
 
-function AMtoTeX() { //constructor
+function __construct() { //constructor
 	$this->AMinitSymbols();
 }
 function convert($str) {
