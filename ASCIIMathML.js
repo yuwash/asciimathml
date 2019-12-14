@@ -56,39 +56,13 @@ var fixphi = true;  		//false to return to legacy phi/varphi mapping
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-var isIE = (navigator.appName.slice(0,9)=="Microsoft");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const document = (new JSDOM()).window.document;
+const alert = console.log
+
+var isIE = false;
 var noMathML = false, translated = false;
-
-if (isIE) { // add MathPlayer info to IE webpages
-  document.write("<object id=\"mathplayer\"\
-  classid=\"clsid:32F66A20-7614-11D4-BD11-00104BD3F987\"></object>");
-  document.write("<?import namespace=\"m\" implementation=\"#mathplayer\"?>");
-}
-
-// Add a stylesheet, replacing any previous custom stylesheet (adapted from TW)
-function setStylesheet(s) {
-	var id = "AMMLcustomStyleSheet";
-	var n = document.getElementById(id);
-	if(document.createStyleSheet) {
-		// Test for IE's non-standard createStyleSheet method
-		if(n)
-			n.parentNode.removeChild(n);
-		// This failed without the &nbsp;
-		document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeEnd","&nbsp;<style id='" + id + "'>" + s + "</style>");
-	} else {
-		if(n) {
-			n.replaceChild(document.createTextNode(s),n.firstChild);
-		} else {
-			n = document.createElement("style");
-			n.type = "text/css";
-			n.id = id;
-			n.appendChild(document.createTextNode(s));
-			document.getElementsByTagName("head")[0].appendChild(n);
-		}
-	}
-}
-
-setStylesheet("#AMMLcloseDiv \{font-size:0.8em; padding-top:1em; color:#014\}\n#AMMLwarningBox \{position:absolute; width:100%; top:0; left:0; z-index:200; text-align:center; font-size:1em; font-weight:bold; padding:0.5em 0 0.5em 0; color:#ffc; background:#c30\}");
 
 function init(){
 	var msg, warnings = new Array();
@@ -103,19 +77,7 @@ function init(){
 }
 
 function checkMathML(){
-  if (navigator.appName.slice(0,8)=="Netscape")
-    if (navigator.appVersion.slice(0,1)>="5") noMathML = null;
-    else noMathML = true;
-  else if (navigator.appName.slice(0,9)=="Microsoft")
-    try {
-        var ActiveX = new ActiveXObject("MathPlayer.Factory.1");
-        noMathML = null;
-    } catch (e) {
-        noMathML = true;
-    }
-  else if (navigator.appName.slice(0,5)=="Opera")
-    if (navigator.appVersion.slice(0,3)>="9.5") noMathML = null;
-  else noMathML = true;
+  noMathML = null;
 
   //noMathML = true; //uncomment to check
   if (noMathML && notifyIfNoMathML) {
@@ -126,36 +88,14 @@ function checkMathML(){
   }
 }
 
-function hideWarning(){
-	var body = document.getElementsByTagName("body")[0];
-	body.removeChild(document.getElementById('AMMLwarningBox'));
-	body.onclick = null;
-}
-
 function displayWarnings(warnings) {
-  var i, frag, nd = createElementXHTML("div");
-  var body = document.getElementsByTagName("body")[0];
-  body.onclick=hideWarning;
-  nd.id = 'AMMLwarningBox';
   for (i=0; i<warnings.length; i++) {
-	frag = createElementXHTML("div");
-	frag.appendChild(document.createTextNode(warnings[i]));
-	frag.style.paddingBottom = "1.0em";
-	nd.appendChild(frag);
+    console.log(warnings[i]);
   }
-  nd.appendChild(createElementXHTML("p"));
-  nd.appendChild(document.createTextNode("For instructions see the "));
-  var an = createElementXHTML("a");
-  an.appendChild(document.createTextNode("ASCIIMathML"));
-  an.setAttribute("href","http://www.chapman.edu/~jipsen/asciimath.html");
-  nd.appendChild(an);
-  nd.appendChild(document.createTextNode(" homepage"));
-  an = createElementXHTML("div");
-  an.id = 'AMMLcloseDiv';
-  an.appendChild(document.createTextNode('(click anywhere to close this warning)'));
-  nd.appendChild(an);
-  var body = document.getElementsByTagName("body")[0];
-  body.insertBefore(nd,body.childNodes[0]);
+  console.log(
+    "For instructions see the "
+    + "[ASCIIMathML](http://www.chapman.edu/~jipsen/asciimath.html)"
+    + " homepage");
 }
 
 function translate(spanclassAM) {
@@ -1146,35 +1086,8 @@ function generic(){
       translate();
   }
 };
-//setup onload function
-if(typeof window.addEventListener != 'undefined'){
-  //.. gecko, safari, konqueror and standard
-  window.addEventListener('load', generic, false);
-}
-else if(typeof document.addEventListener != 'undefined'){
-  //.. opera 7
-  document.addEventListener('load', generic, false);
-}
-else if(typeof window.attachEvent != 'undefined'){
-  //.. win/ie
-  window.attachEvent('onload', generic);
-}else{
-  //.. mac/ie5 and anything else that gets this far
-  //if there's an existing onload function
-  if(typeof window.onload == 'function'){
-    //store it
-    var existing = onload;
-    //add new onload handler
-    window.onload = function(){
-      //call existing onload function
-      existing();
-      //call generic onload function
-      generic();
-    };
-  }else{
-    window.onload = generic;
-  }
-}
+//call generic onload function
+generic();
 
 //expose some functions to outside
 asciimath.newcommand = newcommand;
@@ -1183,3 +1096,4 @@ asciimath.AMprocesssNode = AMprocessNode;
 asciimath.parseMath = parseMath;
 asciimath.translate = translate;
 })();
+export default asciimath
