@@ -1,3 +1,8 @@
+const $ = require('cheerio');
+const he = require('he');
+const tap = require('tap')
+import asciimath from '../ASCIIMathML.js';
+
 var unittests = [
 //single symbol output
 {input: "!=", output:"<mo>≠</mo>"},
@@ -469,54 +474,17 @@ var unittests = [
 {input: "lim_(x rarr 2^-) f(x)", output:"<munder><mo>lim</mo><mrow><mi>x</mi><mo>→</mo><msup><mn>2</mn><mo>-</mo></msup></mrow></munder><mrow><mi>f</mi><mrow><mo>(</mo><mi>x</mi><mo>)</mo></mrow></mrow>"},
 ];
 
-function htmlEntities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-$(function() {
+(function() {
 	setTimeout(runTests, 100);
 	//setTimeout(generateSymbolTests, 100);
-});
+})();
 function runTests() {
-	$("#maketest").on('click', function() {
-		var txt = $("#newtest").val();
-		var out = $(asciimath.parseMath(txt)).find("mstyle").html().replace(/\\/g,"\\\\").replace(/"/g,'\\"');;
-		var outstr = '{input: "'+txt.replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'", output:"'+out+'"},\n';
-		$("#newtestout").text($("#newtestout").text()+outstr);		
-	})
-	var res,tr,td;
-	var tbody = document.getElementById("testout");
+	var res;
 	for (var i=0;i<unittests.length;i++) {
 		res = asciimath.parseMath(unittests[i].input);
-		tr = document.createElement("tr");
+		var outhtml = $(res.outerHTML).find("mstyle").html();
 		
-		td = document.createElement("td");
-		td.appendChild(document.createTextNode(unittests[i].input));
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(res);
-		tr.appendChild(td);
-		var outhtml = $(res).find("mstyle").html();
-		
-		td = document.createElement("td");
-		code = document.createElement("code");
-		code.appendChild(document.createTextNode(outhtml));
-		td.appendChild(code);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		code = document.createElement("code");
-		code.appendChild(document.createTextNode(unittests[i].output));
-		td.appendChild(code);
-		tr.appendChild(td);
-		
-		if (unittests[i].output == outhtml) {
-			tr.className = "success";
-		} else {
-			tr.className = "failed";
-		}
-		tbody.appendChild(tr);
+		tap.equal(he.decode(outhtml), he.decode(unittests[i].output))
 	}
 };
 
