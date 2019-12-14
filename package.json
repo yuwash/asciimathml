@@ -8,5 +8,14 @@
   "license": "MIT",
   "dependencies": {
     "pandoc-filter": "^0.1.8"
+  },
+  "devDependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "he": "^1.2.0",
+    "jsdom": "^15.2.1",
+    "tap": "^13.0.0"
+  },
+  "scripts": {
+    "test": "tap test/unittests.js"
   }
 }
