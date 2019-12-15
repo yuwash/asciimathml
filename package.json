@@ -16,6 +16,6 @@
     "tap": "^13.0.0"
   },
   "scripts": {
-    "test": "tap test/unittests.js"
+    "test": "tap test/unittests.js test/asciimathfilter.test.js"
   }
 }
